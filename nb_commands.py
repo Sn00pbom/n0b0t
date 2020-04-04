@@ -1,6 +1,4 @@
 import random
-import asyncio
-import io
 
 import discord
 from discord.ext import commands
@@ -50,7 +48,6 @@ async def roll_command(context):
 async def anoint_command(context):
     author = context.message.author
     message = context.message.content
-    print(author.roles)
     perm = False
     for role in author.roles:
         if role.name == 'pleb':
