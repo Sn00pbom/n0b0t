@@ -42,11 +42,9 @@ class Counsel(object):
         if member not in vote_act:
             vote_act.add_member(member)
         if vote_act.is_satisfied():
-            print('db satisfied')
             await channel.send('Vote passed! Executing "{}"'.format(command))
             await vote_act.act()
         else:
-            print('db voting')
             await channel.send('Vote status: {}/{} for "{}"'.format(vote_act.n_voters, int(self.vote_reqs[cmd_root]), command))
 
 
