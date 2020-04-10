@@ -5,7 +5,6 @@ import nb_commands
 if __name__ == '__main__':
     @client.event
     async def on_ready():
-        print('Started!')
         await client.change_presence(activity=Game('a pirated copy of Minecraft'))
 
 
