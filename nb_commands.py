@@ -1,4 +1,5 @@
 import random
+import re
 
 import discord
 from discord.ext import commands
@@ -75,6 +76,32 @@ async def anoint_command(context):
     else:
         print('invalid anoint"{}"'.format(message))
 
+
+@client.command(name='delete',
+                pass_context=True)
+async def anoint_command(context):
+    author = context.message.author
+    message = context.message.content
+    argv = message.split(' ')
+    if len(argv) >= 2:
+        pat = re.compile(r'.*/(\d+)')
+        r = pat.findall(argv[1])
+        try:
+            rid = r[0]
+        except:
+            print('invalid link')
+            return
+
+        async def remove_msg():
+            try:
+                msg = await context.message.channel.fetch_message(rid)
+                await msg.delete()
+            except:
+                print('invalid message')
+        message = "{} {}".format(argv[0], rid)
+        counsel.try_vote_act(message, remove_msg, 'delete')
+        await counsel.query(message, author, 'delete', context.message.channel)
+        
 
 @client.command(name='mum',
                 pass_context=True)
