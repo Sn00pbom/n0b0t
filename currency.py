@@ -5,6 +5,7 @@ import string
 
 class CurrencyManager():
     CURRENCY_SYMBOl = '₪'
+    CH_ID = 699673275986608228
 
     def __init__(self, client):
         self.client = client
@@ -12,9 +13,7 @@ class CurrencyManager():
         self.wallets = {}
 
     async def post_shekel(self):
-        ch_id = 699673275986608228
-        # ch_id = 694325538671689799
-        channel = self.client.get_channel(ch_id)
+        channel = self.client.get_channel(self.CH_ID)
         quantity = random.randint(5, 10)
         address = gen_address()
         msg_handle = await channel.send('Shekels dropped! {}{} @ {}'.format(self.CURRENCY_SYMBOl, quantity, address))
@@ -27,7 +26,6 @@ class CurrencyManager():
             if not user_id in self.wallets.keys():
                 self.wallets[user_id] = 0
             self.wallets[user_id] += quantity
-            print(user_id, '->', self.wallets[user_id], 'shekels')
             await msg_handle.delete()
             await claim_msg.delete()
 
