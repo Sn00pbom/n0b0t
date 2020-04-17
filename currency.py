@@ -29,8 +29,8 @@ class CurrencyManager():
                 self.wallets[user_id] = 0
             self.wallets[user_id] += quantity
             print(user_id, '->', self.wallets[user_id], 'shekels')
-            await msg_handle.delete();
-            await claim_msg.delete();
+            await msg_handle.delete()
+            await claim_msg.delete()
 
         except:
             return

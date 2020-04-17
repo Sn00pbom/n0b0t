@@ -4,7 +4,7 @@ import re
 import discord
 from discord.ext import commands
 
-from globals import client, counsel
+from globals import client, counsel, curr_man
 from memeviolation import MemeViolation
 
 
@@ -12,6 +12,18 @@ async def coinflip(context):
     await context.message.channel.send(
         "{} flipped a coin! It's {}!".format(context.message.author.mention,
                                              "heads" if random.randint(0,1) == 0 else "tails"))
+
+
+@client.command(name='claim', pass_context=True)
+async def claim_command(context):
+    msg = context.message.content
+    p = re.compile(r'([a-zA-Z0-9]+)')
+    matches = p.findall(msg)
+
+    if(len(matches) == 2):
+        author = context.message.author
+        mid = matches[1]
+        await curr_man.claim_shekel(str(author.id), mid, context.message)
 
 
 @client.command(name='coinflip', pass_context=True)
