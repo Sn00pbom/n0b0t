@@ -12,6 +12,12 @@ class CurrencyManager():
         self.posts = {}
         self.wallets = {}
 
+    def get_user_val(self, id):
+        try:
+            return self.wallets[str(id)]
+        except:
+            return 0
+
     async def post_shekel(self):
         channel = self.client.get_channel(self.CH_ID)
         quantity = random.randint(5, 10)
