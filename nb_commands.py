@@ -14,6 +14,17 @@ async def coinflip(context):
                                              "heads" if random.randint(0,1) == 0 else "tails"))
 
 
+@client.command(name='balance', pass_context=True)
+async def balance_command(context):
+    author = context.message.author
+    channel = await author.create_dm()
+    try:
+        quantity = curr_man.wallets[str(author.id)]
+    except:
+        quantity = 0
+    await channel.send("Your wallet contains: " + curr_man.CURRENCY_SYMBOl + str(quantity))
+
+
 @client.command(name='claim', pass_context=True)
 async def claim_command(context):
     msg = context.message.content
