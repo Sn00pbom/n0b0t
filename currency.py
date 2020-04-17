@@ -3,7 +3,6 @@ import random
 import string
 
 
-
 class CurrencyManager():
     CURRENCY_SYMBOl = '₪'
 
@@ -13,8 +12,8 @@ class CurrencyManager():
         self.wallets = {}
 
     async def post_shekel(self):
-        # ch_id = 699673275986608228
-        ch_id = 694325538671689799
+        ch_id = 699673275986608228
+        # ch_id = 694325538671689799
         channel = self.client.get_channel(ch_id)
         quantity = random.randint(5, 10)
         address = gen_address()
@@ -37,22 +36,17 @@ class CurrencyManager():
 
 
 class MineTimer:
-    def __init__(self, timeout, callback):
-        self._timeout = timeout
-        self._callback = callback
+    def __init__(self, curr_man):
+        self._curr_man = curr_man
         self._task = asyncio.ensure_future(self._job())
 
     async def _job(self):
-        await asyncio.sleep(self._timeout)
-        await self._callback()
+        while True:
+            await asyncio.sleep(random.randint(20, 45) * 60)
+            await self._curr_man.post_shekel()
 
     def cancel(self):
         self._task.cancel()
-
-
-async def timeout_callback():
-    await asyncio.sleep(0.1)
-    print('echo!')
 
 
 def gen_address():
