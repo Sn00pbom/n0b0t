@@ -23,6 +23,7 @@ async def balance_command(context):
     except:
         quantity = 0
     await channel.send("Your wallet contains: " + curr_man.CURRENCY_SYMBOl + str(quantity))
+    await context.message.delete()
 
 
 @client.command(name='claim', pass_context=True)
