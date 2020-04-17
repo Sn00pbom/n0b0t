@@ -91,7 +91,7 @@ async def anoint_command(context):
 
 @client.command(name='delete',
                 pass_context=True)
-async def anoint_command(context):
+async def delete_command(context):
     author = context.message.author
     message = context.message.content
     argv = message.split(' ')
