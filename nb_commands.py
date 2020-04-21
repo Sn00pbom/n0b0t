@@ -14,6 +14,31 @@ async def coinflip(context):
                                              "heads" if random.randint(0,1) == 0 else "tails"))
 
 
+@client.command(name='pay', pass_context=True)
+async def pay_command(context):
+    author = context.message.author
+    args = context.message.content.split(' ')
+    # check inputs
+    try:
+        amount = int(args[2])
+        assert amount > 0
+        converter = commands.MemberConverter()
+        target_user = await converter.convert(context, args[1])
+    except:
+        return
+
+    curr_man.check_user(author.id)
+    curr_man.check_user(target_user.id)
+    if curr_man.user_has_value(author.id, amount):
+        curr_man.wallets[str(target_user.id)] += amount
+        curr_man.wallets[str(author.id)] -= amount
+        await context.message.channel.send("{} paid {} {}{}!".format(
+            author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount))
+    else:
+        await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
+                                           .format(author.mention))
+
+
 @client.command(name='balance', pass_context=True)
 async def balance_command(context):
     author = context.message.author
