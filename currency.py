@@ -3,7 +3,7 @@ import random
 import string
 
 
-class CurrencyManager():
+class CurrencyManager(object):
     CURRENCY_SYMBOl = '₪'
     CH_ID = 699673275986608228
 
@@ -12,11 +12,15 @@ class CurrencyManager():
         self.posts = {}
         self.wallets = {}
 
-    def get_user_val(self, id):
-        try:
-            return self.wallets[str(id)]
-        except:
-            return 0
+    def check_user(self, uid):
+        uid = str(uid)
+        if uid not in self.wallets.keys():
+            self.wallets[uid] = 0
+
+    def user_has_value(self, uid, amount):
+        uid = str(uid)
+        self.check_user(uid)
+        return self.wallets[uid] >= amount
 
     async def post_shekel(self):
         channel = self.client.get_channel(self.CH_ID)
@@ -39,7 +43,7 @@ class CurrencyManager():
             return
 
 
-class MineTimer:
+class MineTimer(object):
     def __init__(self, curr_man):
         self._curr_man = curr_man
         self._task = asyncio.ensure_future(self._job())
