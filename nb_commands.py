@@ -14,6 +14,62 @@ async def coinflip(context):
                                              "heads" if random.randint(0,1) == 0 else "tails"))
 
 
+async def insufficient_funds(context):
+    await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
+                                       .format(context.message.author.mention))
+
+
+@client.command(name='spin', pass_context=True)
+async def spin_command(context):
+    author = context.message.author
+
+    SPIN_COST = 2
+
+    if not curr_man.user_has_value(author.id, SPIN_COST):
+        await insufficient_funds(context)
+        return
+    else:
+        curr_man.wallets[str(author.id)] -= SPIN_COST
+
+    wheel_vals = [
+        ':peach:',
+        ':japanese_goblin:',
+        ':watermelon:',
+        ':eggplant:',
+        ':pick:',
+        ':poo:',
+        ':teddy_bear:',
+        ':earth_americas:',
+        ':moyai:',
+        ':man_mage:'
+    ]
+    w1 = random.choice(range(10))
+    w2 = random.choice(range(10))
+    w3 = random.choice(range(10))
+    frmts = ''
+    if w1 is 0 and w2 is 0 and w3 is 0:  # jackpot case
+        frmts += ':rotating_light: ' \
+                 ':regional_indicator_j: :regional_indicator_a: :regional_indicator_c: :regional_indicator_k:' \
+                 ':b: :regional_indicator_o: :regional_indicator_t:' \
+                 ' :rotating_light:\n'
+        o = 1000
+    elif w1 is w2 and w2 is w3 and w1 is w3:  # all same case
+        o = 30
+    elif w1 is w2 or w2 is w3:  # two adjacent same case
+        o = 2
+    elif w1 is 0 or w2 is 0 or w3 is 0:  # any 0 case
+        o = 1
+    else:
+        o = 0
+
+    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║\n╚══════════╝\n→ {}'
+
+    curr_man.wallets[str(author.id)] += o
+    await context.message.channel.send(frmts.format(
+        wheel_vals[w1], wheel_vals[w2], wheel_vals[w3], o
+    ))
+
+
 @client.command(name='pay', pass_context=True)
 async def pay_command(context):
     author = context.message.author
@@ -35,8 +91,7 @@ async def pay_command(context):
         await context.message.channel.send("{} paid {} {}{}!".format(
             author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount))
     else:
-        await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
-                                           .format(author.mention))
+        await insufficient_funds(context)
 
 
 @client.command(name='balance', pass_context=True)
