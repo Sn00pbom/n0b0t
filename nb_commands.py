@@ -22,51 +22,98 @@ async def insufficient_funds(context):
 @client.command(name='spin', pass_context=True)
 async def spin_command(context):
     author = context.message.author
+    args = context.message.content.split(' ')
+    if len(args) > 1:
+        try:
+            SPIN_COST = int(args[1])
+            assert 0 < SPIN_COST <=3
+        except:
+            return
+        
+    else:
+        SPIN_COST = 1
 
     # check author wallet and remove cost
-    SPIN_COST = 1
     if not curr_man.user_has_value(author.id, SPIN_COST):
         await insufficient_funds(context)
         return
     else:
         curr_man.wallets[str(author.id)] -= SPIN_COST
 
-    wheel_vals = [
-        ':peach:',
-        ':japanese_goblin:',
-        ':watermelon:',
-        ':eggplant:',
-        ':pick:',
-        ':poo:',
-        ':teddy_bear:',
-        ':earth_americas:',
-        ':moyai:',
-        ':man_mage:'
-    ]
-    w1 = random.choice(range(10))
-    w2 = random.choice(range(10))
-    w3 = random.choice(range(10))
+    pay_1 = [4000, 100, 75, 30, 20, 10, 5, 2]
+    pay_2 = [8000, 200, 150, 60, 40, 20, 10, 4]
+    pay_3 = [12000, 300, 255, 90, 60, 30, 15, 6]
+    pay = [pay_1, pay_2, pay_3][SPIN_COST-1]
+
+    # tier 1 is 0
+    tier2 = range(1, 3)
+    tier3 = range(3, 6)
+    tier4 = range(6, 10)
+    tier5 = range(10, 15)
+    tier6 = range(15, 22)
+
+    def wheel_vals(i):
+        vals = [
+            ':peach:',
+            ':japanese_goblin:',
+            ':watermelon:',
+            ':eggplant:',
+            ':pick:',
+            ':poo:',
+            ':middle_finger:'
+            # ':teddy_bear:',
+            # ':earth_americas:',
+            # ':moyai:',
+            # ':man_mage:'
+        ]
+        if i is 0: pass
+        elif i in tier2: i = 1
+        elif i in tier3: i = 2
+        elif i in tier4: i = 3
+        elif i in tier5: i = 4
+        elif i in tier6: i = 5
+        else: i = 6
+        return vals[i]
+
+    N_VALUES = 50
+    # wheel outcome values
+    w1 = random.choice(range(N_VALUES))
+    w2 = random.choice(range(N_VALUES))
+    w3 = random.choice(range(N_VALUES))
     frmts = ''
-    if w1 is 0 and w2 is 0 and w3 is 0:  # jackpot case
+    if w1 is 0 and w2 is 0 and w3 is 0:  # jackpot case (tier 1)
         frmts += ':rotating_light: ' \
                  ':regional_indicator_j: :regional_indicator_a: :regional_indicator_c: :regional_indicator_k:' \
                  ':b: :regional_indicator_o: :regional_indicator_t:' \
                  ' :rotating_light: @everyone\n'
-        o = 1000
-    elif w1 is w2 and w2 is w3 and w1 is w3:  # all same case
-        o = 40
-    elif w1 is w2 or w2 is w3:  # two adjacent same case
-        o = 2
-    elif w1 is 0 or w2 is 0 or w3 is 0:  # any 0 case
-        o = 1
+        o = pay[0]
+    elif w1 in tier2 and w2 in tier2 and w3 in tier2:
+        o = pay[1]
+    elif w1 in tier3 and w2 in tier3 and w3 in tier3:
+        o = pay[2]
+    elif w1 in tier4 and w2 in tier4 and w3 in tier4:
+        o = pay[3]
+    elif w1 in tier5 and w2 in tier5 and w3 in tier5:
+        o = pay[4]
+    elif w1 in tier6 and w2 in tier6 and w3 in tier6:
+        o = pay[5]
+    elif (w1 in tier6 and w2 in tier6) or (w2 in tier6 and w3 in tier6) or (w1 in tier6 and w3 in tier6):
+        o = pay[6]
+    elif w1 in tier6 or w2 in tier6 or w3 in tier6:
+        o = pay[7]
     else:
         o = 0
 
-    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ → Paying {} {}{}\n╚══════════╝'
+    if o is 0:
+        payfs = 'Better luck next time!'
+    else:
+        payfs = '→ Paying {} {}{}'.format(author.mention, curr_man.CURRENCY_SYMBOl, o)
+
+    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ {}\n╚══════════╝'
 
     curr_man.wallets[str(author.id)] += o
     await context.message.channel.send(frmts.format(
-        wheel_vals[w1], wheel_vals[w2], wheel_vals[w3], author.mention, curr_man.CURRENCY_SYMBOl, o
+        wheel_vals(w1), wheel_vals(w2), wheel_vals(w3), payfs
     ))
 
 
