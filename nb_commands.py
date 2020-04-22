@@ -8,12 +8,6 @@ from globals import client, counsel, curr_man
 from memeviolation import MemeViolation
 
 
-async def coinflip(context):
-    await context.message.channel.send(
-        "{} flipped a coin! It's {}!".format(context.message.author.mention,
-                                             "heads" if random.randint(0,1) == 0 else "tails"))
-
-
 async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
@@ -141,7 +135,7 @@ async def pay_command(context):
         await insufficient_funds(context)
 
 
-@client.command(name='balance', pass_context=True)
+@client.command(name='balance', pass_context=True, aliases = ['wallet'])
 async def balance_command(context):
     author = context.message.author
     channel = await author.create_dm()
@@ -165,20 +159,11 @@ async def claim_command(context):
         await curr_man.claim_shekel(str(author.id), mid, context.message)
 
 
-@client.command(name='coinflip', pass_context=True)
-async def coinflip_coinflip_alias(context): await coinflip(context)
-
-
-@client.command(name='coin', pass_context=True)
-async def coin_coinflip_alias(context): await coinflip(context)
-
-
-@client.command(name='flip', pass_context=True)
-async def flip_coinflip_alias(context): await coinflip(context)
-
-
-@client.command(name='cf', pass_context=True)
-async def cf_coinflip_alias(context): await coinflip(context)
+@client.command(name='coinflip', pass_context=True, aliases=['coin', 'flip', 'cf'])
+async def coinflip_coinflip_alias(context):
+    await context.message.channel.send(
+        "{} flipped a coin! It's {}!".format(context.message.author.mention,
+                                             "heads" if random.randint(0,1) == 0 else "tails"))
 
 
 @client.command(name='roll',
