@@ -12,6 +12,12 @@ async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
 
+@client.command(name='paytable', pass_context=True)
+async def paytable_command(context):
+    author = context.message.author
+    dm_ch = await author.create_dm()
+    await dm_ch.send(file=discord.File('assets/paytable.png'))
+    await context.message.delete()
 
 @client.command(name='spin', pass_context=True)
 async def spin_command(context):
