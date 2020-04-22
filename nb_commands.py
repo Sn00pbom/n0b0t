@@ -220,13 +220,13 @@ async def delete_command(context):
     message = context.message.content
     argv = message.split(' ')
     if len(argv) >= 2:
+        # parse id from link
         pat = re.compile(r'.*/(\d+)')
         r = pat.findall(argv[1])
         try:
             rid = r[0]
         except:
-            print('invalid link')
-            return
+            rid = argv[1]
 
         async def remove_msg():
             try:
