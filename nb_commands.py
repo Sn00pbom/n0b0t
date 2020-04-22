@@ -23,8 +23,8 @@ async def insufficient_funds(context):
 async def spin_command(context):
     author = context.message.author
 
-    SPIN_COST = 2
-
+    # check author wallet and remove cost
+    SPIN_COST = 1
     if not curr_man.user_has_value(author.id, SPIN_COST):
         await insufficient_funds(context)
         return
@@ -51,10 +51,10 @@ async def spin_command(context):
         frmts += ':rotating_light: ' \
                  ':regional_indicator_j: :regional_indicator_a: :regional_indicator_c: :regional_indicator_k:' \
                  ':b: :regional_indicator_o: :regional_indicator_t:' \
-                 ' :rotating_light:\n'
+                 ' :rotating_light: @everyone\n'
         o = 1000
     elif w1 is w2 and w2 is w3 and w1 is w3:  # all same case
-        o = 30
+        o = 40
     elif w1 is w2 or w2 is w3:  # two adjacent same case
         o = 2
     elif w1 is 0 or w2 is 0 or w3 is 0:  # any 0 case
@@ -62,11 +62,11 @@ async def spin_command(context):
     else:
         o = 0
 
-    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║\n╚══════════╝\n→ {}'
+    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ → Paying {} {}{}\n╚══════════╝'
 
     curr_man.wallets[str(author.id)] += o
     await context.message.channel.send(frmts.format(
-        wheel_vals[w1], wheel_vals[w2], wheel_vals[w3], o
+        wheel_vals[w1], wheel_vals[w2], wheel_vals[w3], author.mention, curr_man.CURRENCY_SYMBOl, o
     ))
 
 
