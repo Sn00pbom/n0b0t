@@ -36,7 +36,7 @@ class MemeViolation(object):
         mv_img = Image.open('assets/memeviolation.jpg')
         x_img = Image.open('assets/x.png')
 
-        title_font = ImageFont.truetype('arial', 15)
+        title_font = ImageFont.load_default()
 
         for isoffense, loc in zip(self.offenses, MemeViolation.X_LOCATIONS):
             if isoffense:
