@@ -1,5 +1,6 @@
 import random
 import re
+from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -297,30 +298,43 @@ async def memeviolation_command(context):
             code = int(code)
             code = list(str(code))
             code = [int(v) for v in code]
+            converter = commands.MemberConverter()
+            target = await converter.convert(context, target)
         except ValueError as e:
-            print(e)
             return
 
-        other_text = ' '.join(args)
-        mv = MemeViolation(code, sender, other_text=other_text)
-        img = mv.generate()
-        # img_bytes = io.BytesIO()
-        img.save('pil_text.png')
-        # img_bytes = img_bytes.getvalue()
-        # pic = discord.File(img_bytes)
-        pic = discord.File('pil_text.png')
-        await context.message.channel.send(file=pic)
+        async def send_mv():
+            PENALTY = 15
+            other_text = ' '.join(args)
+            mv = MemeViolation(code, sender, other_text=other_text)
+            img = mv.generate()
+            with BytesIO() as img_bin:
+                img.save(img_bin, 'PNG')
+                img_bin.seek(0)
+                await context.message.channel.send(":rotating_light: MEME VIOLATION :rotating_light:\nIssued to -> {}! penalized {}{}".format(target.mention, curr_man.CURRENCY_SYMBOl, PENALTY),
+                                                    file=discord.File(fp=img_bin, filename='mv.png'))
+            curr_man.check_user(target)
+            if curr_man.user_has_value(target.id, PENALTY):
+                curr_man.wallets[str(target.id)] -= PENALTY
 
+        counsel.try_vote_act(msg, send_mv, 'memeviolation')
+        await counsel.query(msg, sender, 'memeviolation', context.message.channel)
     else:
-        return
+        m = """```
+1: Madding Too Fast
+2: Louding Too Fast
+3: Background Shit
+4: Gay Porn Too Gay
+5: Unironic XD
+6: Rapid Head Expansion
+7: Global Elite Syndrome
+8: Spoilers
+9: Unidentified Sucking Noises
+0: Other: *MSG
 
-
-
-    # change user context
-
-    # send prompt
-
-    # get user response
-
-    # generate meme violation
-    # send meme violation in chat and personal message to offendee
+Example Usage:
+    .memeviolation @targetsName 1
+    .memeviolation @targetsName 2345
+    .memeviolation @targetsName 0 *MSG```
+        """
+        await context.message.channel.send(m)

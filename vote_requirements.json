@@ -3,5 +3,6 @@
   "exile": "7",
   "kick": "10",
   "ban": "12",
-  "delete": "3"
+  "delete": "3",
+  "memeviolation": "5"
 }
