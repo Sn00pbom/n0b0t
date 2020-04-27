@@ -1,6 +1,7 @@
 import asyncio
 import random
 import string
+import datetime
 
 
 class CurrencyManager(object):
@@ -28,6 +29,8 @@ class CurrencyManager(object):
         address = gen_address()
         msg_handle = await channel.send('Shekels dropped! {}{} @ {}'.format(self.CURRENCY_SYMBOl, quantity, address))
         self.posts[address] = (quantity, msg_handle)
+        with open('money_log.txt', 'a') as f:
+            f.write('[POST] {} -> {}, {}\n'.format(datetime.datetime.now(), quantity, address))
 
     async def claim_shekel(self, user_id, shekel_id, claim_msg):
         try:
@@ -38,6 +41,8 @@ class CurrencyManager(object):
             self.wallets[user_id] += quantity
             await msg_handle.delete()
             await claim_msg.delete()
+            with open('money_log.txt', 'a') as f:
+                f.write('[CLAIM] {} -> {}, {}, {}\n'.format(datetime.datetime.now(), user_id, quantity, shekel_id))
 
         except:
             return
