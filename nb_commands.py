@@ -139,7 +139,7 @@ async def pay_command(context):
         await insufficient_funds(context)
 
 
-@client.command(name='balance', pass_context=True, aliases = ['wallet'])
+@client.command(name='balance', pass_context=True, aliases = ['wallet', 'bal', 'money'])
 async def balance_command(context):
     author = context.message.author
     channel = await author.create_dm()
