@@ -1,7 +1,8 @@
 import asyncio
 import random
-import string
 import datetime
+
+import util
 
 
 class CurrencyManager(object):
@@ -26,7 +27,7 @@ class CurrencyManager(object):
     async def post_shekel(self):
         channel = self.client.get_channel(self.CH_ID)
         quantity = random.randint(5, 10)
-        address = gen_address()
+        address = util.gen_address()
         msg_handle = await channel.send('Shekels dropped! {}{} @ {}'.format(self.CURRENCY_SYMBOl, quantity, address))
         self.posts[address] = (quantity, msg_handle)
         with open('money_log.txt', 'a') as f:
@@ -60,13 +61,3 @@ class MineTimer(object):
 
     def cancel(self):
         self._task.cancel()
-
-
-def gen_address():
-    vals = string.ascii_letters + string.digits
-    v = ''
-    for _ in range(16):
-        v += random.choice(vals)
-    return v
-
-
