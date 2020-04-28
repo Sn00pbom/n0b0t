@@ -43,6 +43,14 @@ class Byte(object):
     def __invert__(self):
         return Byte(~ self._v)
 
+    def __eq__(self, b):
+        if isinstance(b, int):
+            return self._v == b
+        elif isinstance(b, Byte):
+            return self._v == b._v
+        else:
+            return False
+
 
 class Egg(object):
     def __init__(self):
