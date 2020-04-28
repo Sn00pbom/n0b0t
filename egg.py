@@ -39,6 +39,9 @@ class Byte(object):
         b = Byte(b) if not isinstance(b, Byte) else b
         return Byte(self._v ^ b._v)
 
+    def __invert__(self):
+        return Byte(~ self._v)
+
 
 class Egg(object):
     def __init__(self):
@@ -53,8 +56,20 @@ class Egg(object):
     def ADD(self, a, b):
         self.__dict__[a] += b if isinstance(b, Byte) else self.__dict__[b]
 
+    def SUB(self, a, b):
+        self.__dict__[a] -= b if isinstance(b, Byte) else self.__dict__[b]
+
     def AND(self, a, b):
         self.__dict__[a] &= b if isinstance(b, Byte) else self.__dict__[b]
+
+    def OR(self, a, b):
+        self.__dict__[a] |= b if isinstance(b, Byte) else self.__dict__[b]
+
+    def XOR(self, a, b):
+        self.__dict__[a] ^= b if isinstance(b, Byte) else self.__dict__[b]
+
+    def NOT(self, a):
+        self.__dict__[a] = ~self.__dict__[a]
 
     def MOV(self, a, b):
         self.__dict__[a] = b if isinstance(b, Byte) else self.__dict__[b]
@@ -69,6 +84,7 @@ class Egg(object):
         else:
             self.sf = 0
             self.zf = 0
+
 
 class EggEnv(Egg):
     def __init__(self, instr):
@@ -86,10 +102,14 @@ class EggEnv(Egg):
         self.ip += 1
         if self.ip < len(self.instr):
             sinstr, sargs = self.instr[self.ip]
-            arg1, arg2 = sargs
-
             instr = getattr(self, sinstr)
-            args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
+
+            if len(sargs) is 1:
+                args = sargs
+            else:
+                arg1, arg2 = sargs
+                args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
+
             instr(*args)
 
         else:
@@ -99,12 +119,14 @@ class EggEnv(Egg):
 if __name__ == "__main__":
     egg = Egg()
     egg.add_instr('MOV', 'ax', Byte(0xec))
+    egg.add_instr('NOT', 'ax')
     egg.add_instr('MOV', 'bx', Byte(0x23))
     egg.add_instr('AND', 'bx', 'ax')
     egg.add_instr('ADD', 'cx', 'bx')
     egg.add_instr('ADD', 'cx', 'ax')
     env = egg.get_env()
+    print(env.ax, env.bx, env.cx, env.dx)
     while not env.done:
         env.step()
-    print(env.ax, env.bx, env.cx, env.dx)
+        print(env.ax, env.bx, env.cx, env.dx)
 
