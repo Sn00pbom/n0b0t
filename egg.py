@@ -248,26 +248,30 @@ class EggManager(object):
 
             return False
         
-
-    def spawn_T0(self):
-        PAYOUT = 0
+    def _spawn(self, spawn_func, payout):
         egg = Egg()
         builder = EggBuilder(egg)
-        builder.build_rand_line()  # build 1 line for tutorial
+
+        spawn_func(builder)
 
         env = egg.get_env()
         env.ax = Byte(random.randint(0, 9))
         env.bx = Byte(random.randint(0, 9))
         env.cx = Byte(random.randint(0, 9))
         env.dx = Byte(random.randint(0, 9))
-        print(env.ax, env.bx, env.cx, env.dx)
         env.run()
         result = [env.ax, env.bx, env.cx, env.dx]
-        print(result)
-
         uid = util.gen_address()
-        self.eggs[uid] = [0, egg, result, PAYOUT]  # put attempts, egg obj, results into eggs@id
+        self.eggs[uid] = [0, egg, result, payout]  # put attempts, egg obj, results into eggs@id
         return uid
+
+    def spawn_T0(self):
+        PAYOUT = 0
+        def build(builder):
+            builder.build_rand_line()  # build 1 line for tutorial
+
+        return self._spawn(build, PAYOUT)
+
 
 
 if __name__ == "__main__":
