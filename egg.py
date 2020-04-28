@@ -95,25 +95,23 @@ class EggEnv(Egg):
         self.dx = Byte()  # dx register
         self.sf = Byte()  # sign flag
         self.zf = Byte()  # zero flag
-        self.ip = -1  # instruction pointer
+        self.ip = 0  # instruction pointer
         self.done = False
 
     def step(self):
-        self.ip += 1
-        if self.ip < len(self.instr):
-            sinstr, sargs = self.instr[self.ip]
-            instr = getattr(self, sinstr)
+        sinstr, sargs = self.instr[self.ip]
+        instr = getattr(self, sinstr)
 
-            if len(sargs) is 1:
-                args = sargs
-            else:
-                arg1, arg2 = sargs
-                args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
-
-            instr(*args)
-
+        if len(sargs) is 1:
+            args = sargs
         else:
-            self.done = True
+            arg1, arg2 = sargs
+            args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
+
+        instr(*args)
+
+        self.ip += 1
+        self.done = self.ip >= len(self.instr)
 
 
 if __name__ == "__main__":
@@ -124,6 +122,7 @@ if __name__ == "__main__":
     egg.add_instr('AND', 'bx', 'ax')
     egg.add_instr('ADD', 'cx', 'bx')
     egg.add_instr('ADD', 'cx', 'ax')
+    egg.add_instr('SUB', 'ax', Byte(0x2))
     env = egg.get_env()
     print(env.ax, env.bx, env.cx, env.dx)
     while not env.done:
