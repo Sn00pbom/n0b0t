@@ -47,31 +47,8 @@ class Egg(object):
     def add_instr(self, instr_s, *args):
         self.instr.append((instr_s, args))
 
-    def env(self):
-        negg = Egg()
-        negg.instr = self.instr  # env inherits instruction list
-        negg.ax = Byte()  # ax register
-        negg.bx = Byte()  # bx register
-        negg.cx = Byte()  # cx register
-        negg.dx = Byte()  # dx register
-        negg.sf = Byte()  # sign flag
-        negg.zf = Byte()  # zero flag
-        negg.ip = -1  # instruction pointer
-        negg.done = False
-        return negg
-
-    def step(self):
-        self.ip += 1
-        if self.ip < len(self.instr):
-            sinstr, sargs = self.instr[self.ip]
-            arg1, arg2 = sargs
-
-            instr = getattr(self, sinstr)
-            args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
-            instr(*args)
-
-        else:
-            self.done = True
+    def get_env(self):
+        return EggEnv(self.instr)
 
     def ADD(self, a, b):
         self.__dict__[a] += b if isinstance(b, Byte) else self.__dict__[b]
@@ -93,6 +70,31 @@ class Egg(object):
             self.sf = 0
             self.zf = 0
 
+class EggEnv(Egg):
+    def __init__(self, instr):
+        self.instr = instr  # instruction list
+        self.ax = Byte()  # ax register
+        self.bx = Byte()  # bx register
+        self.cx = Byte()  # cx register
+        self.dx = Byte()  # dx register
+        self.sf = Byte()  # sign flag
+        self.zf = Byte()  # zero flag
+        self.ip = -1  # instruction pointer
+        self.done = False
+
+    def step(self):
+        self.ip += 1
+        if self.ip < len(self.instr):
+            sinstr, sargs = self.instr[self.ip]
+            arg1, arg2 = sargs
+
+            instr = getattr(self, sinstr)
+            args = [arg1, self.__dict__[arg2] if not isinstance(arg2, Byte) else arg2]
+            instr(*args)
+
+        else:
+            self.done = True
+
 
 if __name__ == "__main__":
     egg = Egg()
@@ -101,7 +103,7 @@ if __name__ == "__main__":
     egg.add_instr('AND', 'bx', 'ax')
     egg.add_instr('ADD', 'cx', 'bx')
     egg.add_instr('ADD', 'cx', 'ax')
-    env = egg.env()
+    env = egg.get_env()
     while not env.done:
         env.step()
     print(env.ax, env.bx, env.cx, env.dx)
