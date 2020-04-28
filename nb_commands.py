@@ -13,9 +13,40 @@ async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
 
+@client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
+async def anonymize_command(context):
+    ANON_COST = 4
+    author = context.author
+    args = context.message.content.split(' ')
+    try:
+        assert len(args) >= 3
+        converter = commands.MemberConverter()
+        recipient = await converter.convert(context, args[1])
+
+        curr_man.check_user(author.id)
+        if curr_man.user_has_value(author.id, ANON_COST):
+
+            usr_msg = "Received anon message!\n```\n{}\n```".format(' '.join(args[2::]))
+            rec_dm = await recipient.create_dm()
+            
+            await rec_dm.send(usr_msg)
+            auth_dm = await author.create_dm()
+            await context.message.delete()
+            await auth_dm.send("Message Sent to {}! Thank you for your business!".format(recipient.mention))
+
+            curr_man.wallets[str(author.id)] -= ANON_COST
+        else:
+            await insufficient_funds(context)
+
+    except AssertionError as e:
+        dm = await author.create_dm()
+        await dm.send('Usage: .anonymize @RECIPIENT *MSG')
+
+
 @client.command(name='paytable', pass_context=True)
 async def paytable_command(context):
     await context.message.channel.send(file=discord.File('assets/paytable.png'))
+
 
 @client.command(name='spin', pass_context=True)
 async def spin_command(context):
