@@ -114,6 +114,10 @@ class EggEnv(Egg):
         self.ip += 1
         self.done = self.ip >= len(self.instr)
 
+    def run(self):
+        while not self.done:
+            self.step()
+
 
 class EggBuilder(object):
     REGS = [
@@ -191,6 +195,31 @@ class EggBuilder(object):
         dest = random.choice(EggBuilder.REGS)
         source = EggBuilder.rand_source()
         return 'MOV', dest, source
+
+
+class EggManager(object):
+    """Singleton global object to keep track of active eggs and their attempts"""
+    
+    def __init__(self):
+        self.eggs = {}
+
+    def check_soln(self, egg_id, regs):
+        egg_info = self.eggs[egg_id]
+        # TODO finish implement
+
+    def spawn_T0(self):
+        egg = Egg()
+        builder = EggBuilder(egg)
+        builder.build_rand_line()
+
+        env = egg.get_env()
+        env.ax = Byte(random.randint(0, 9))
+        env.bx = Byte(random.randint(0, 9))
+        env.cx = Byte(random.randint(0, 9))
+        env.dx = Byte(random.randint(0, 9))
+        env.run()
+        result = [env.ax, env.bx, env.cx, env.dx]
+        # TODO finish implement
 
 
 
