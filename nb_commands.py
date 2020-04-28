@@ -15,7 +15,7 @@ async def insufficient_funds(context):
 
 @client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
 async def anonymize_command(context):
-    ANON_COST = 4
+    ANON_COST = 2
     author = context.author
     args = context.message.content.split(' ')
     try:
@@ -38,9 +38,8 @@ async def anonymize_command(context):
         else:
             await insufficient_funds(context)
 
-    except AssertionError as e:
-        dm = await author.create_dm()
-        await dm.send('Usage: .anonymize @RECIPIENT *MSG')
+    except:
+        await context.message.channel.send('Usage: .anonymize @RECIPIENT *MSG')
 
 
 @client.command(name='paytable', pass_context=True)
