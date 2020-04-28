@@ -1,3 +1,4 @@
+import random
 #
 #  Crack the Egg
 #
@@ -114,18 +115,104 @@ class EggEnv(Egg):
         self.done = self.ip >= len(self.instr)
 
 
+class EggBuilder(object):
+    REGS = [
+        'ax',
+        'bx',
+        'cx',
+        'dx',
+    ]
+
+    def __init__(self, egg=None):
+        self.egg = egg if egg else Egg()
+
+    def build_rand_line(self, n=1):
+        for _ in range(n):
+            f = random.choice(EggBuilder.BUILDER_FUNCS())
+            self.egg.add_instr(*f())
+
+    @staticmethod
+    def BUILDER_FUNCS():
+        return [
+            EggBuilder.build_ADD,
+            EggBuilder.build_SUB,
+            EggBuilder.build_AND,
+            EggBuilder.build_OR,
+            EggBuilder.build_XOR,
+            EggBuilder.build_ADD,
+            EggBuilder.build_NOT,
+            EggBuilder.build_MOV,
+        ]
+
+    @staticmethod
+    def rand_source():
+        if random.randint(0, 1):
+            return random.choice(EggBuilder.REGS)
+        else:
+            return Byte(random.randint(0, 255))
+
+    @staticmethod
+    def build_ADD():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'ADD', dest, source
+        
+    @staticmethod
+    def build_SUB():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'SUB', dest, source
+
+    @staticmethod
+    def build_AND():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'AND', dest, source
+    
+    @staticmethod
+    def build_OR():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'OR', dest, source
+
+    @staticmethod
+    def build_XOR():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'XOR', dest, source
+
+    @staticmethod
+    def build_NOT():
+        dest = random.choice(EggBuilder.REGS)
+        return 'NOT', dest
+
+    @staticmethod
+    def build_MOV():
+        dest = random.choice(EggBuilder.REGS)
+        source = EggBuilder.rand_source()
+        return 'MOV', dest, source
+
+
+
 if __name__ == "__main__":
+    # Just a test
+
     egg = Egg()
-    egg.add_instr('MOV', 'ax', Byte(0xec))
-    egg.add_instr('NOT', 'ax')
-    egg.add_instr('MOV', 'bx', Byte(0x23))
-    egg.add_instr('AND', 'bx', 'ax')
-    egg.add_instr('ADD', 'cx', 'bx')
-    egg.add_instr('ADD', 'cx', 'ax')
-    egg.add_instr('SUB', 'ax', Byte(0x2))
-    env = egg.get_env()
-    print(env.ax, env.bx, env.cx, env.dx)
-    while not env.done:
-        env.step()
-        print(env.ax, env.bx, env.cx, env.dx)
+    builder = EggBuilder(egg)
+    
+    builder.build_rand_line()
+
+    for _ in range(1):
+        env = egg.get_env()
+        # Random initial register vals
+        env.ax = Byte(random.randint(1, 3))
+        env.bx = Byte(random.randint(10, 12))
+        env.cx = Byte(random.randint(35, 38))
+        env.dx = Byte(random.randint(-6, -3))
+        print('initial:', env.ax, env.bx, env.cx, env.dx)
+        while not env.done:
+            env.step()
+        for v in egg.instr:
+            print(v)
+        print('final:', env.ax, env.bx, env.cx, env.dx)
 
