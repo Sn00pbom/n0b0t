@@ -1,4 +1,6 @@
 import random
+
+import util
 #
 #  Crack the Egg
 #
@@ -211,45 +213,90 @@ class EggManager(object):
     def __init__(self):
         self.eggs = {}
 
+    def has_id(self, egg_id):
+        return egg_id in self.eggs.keys()
+
     def check_soln(self, egg_id, regs):
-        egg_info = self.eggs[egg_id]
-        # TODO finish implement
+        if not self.has_id(egg_id): return
+
+        egg = self.eggs[egg_id][1]
+        for i in range(len(regs)):  # cast all regs strings to int
+            r = regs[i]
+            if r.startswith('0x'):  # check if hex string
+                regs[i] = int(r, 0)
+            else:
+                regs[i] = int(r)
+
+        env = egg.get_env()
+        env.ax = Byte(regs[0])
+        env.bx = Byte(regs[1])
+        env.cx = Byte(regs[2])
+        env.dx = Byte(regs[3])
+        env.run()
+
+        results = self.eggs[egg_id][2]
+
+        self.eggs[egg_id][0] += 1
+
+        if env.ax == results[0] and env.bx == results[1] and env.cx == results[2] and env.dx == results[3]:
+            del(self.eggs[egg_id])
+            return True
+        else:
+            if self.eggs[egg_id][0] == 3:
+                print('egg exhausted @ {}'.format(egg_id))
+                del(self.eggs[egg_id])  # remove exhausted egg
+
+            return False
+        
 
     def spawn_T0(self):
+        PAYOUT = 0
         egg = Egg()
         builder = EggBuilder(egg)
-        builder.build_rand_line()
+        builder.build_rand_line()  # build 1 line for tutorial
 
         env = egg.get_env()
         env.ax = Byte(random.randint(0, 9))
         env.bx = Byte(random.randint(0, 9))
         env.cx = Byte(random.randint(0, 9))
         env.dx = Byte(random.randint(0, 9))
+        print(env.ax, env.bx, env.cx, env.dx)
         env.run()
         result = [env.ax, env.bx, env.cx, env.dx]
-        # TODO finish implement
+        print(result)
 
+        uid = util.gen_address()
+        self.eggs[uid] = [0, egg, result, PAYOUT]  # put attempts, egg obj, results into eggs@id
+        return uid
 
 
 if __name__ == "__main__":
     # Just a test
 
-    egg = Egg()
-    builder = EggBuilder(egg)
-    
-    builder.build_rand_line()
+    egg_man = EggManager()
+    uid = egg_man.spawn_T0()
+    while not egg_man.eggs[uid][0] == 3:
+        regs = str(input('enter regs:')).split(' ')
+        print(egg_man.check_soln(uid, regs))
 
-    for _ in range(1):
-        env = egg.get_env()
-        # Random initial register vals
-        env.ax = Byte(random.randint(1, 3))
-        env.bx = Byte(random.randint(10, 12))
-        env.cx = Byte(random.randint(35, 38))
-        env.dx = Byte(random.randint(-6, -3))
-        print('initial:', env.ax, env.bx, env.cx, env.dx)
-        while not env.done:
-            env.step()
-        for v in egg.instr:
-            print(v)
-        print('final:', env.ax, env.bx, env.cx, env.dx)
+
+    # egg = Egg()
+    # builder = EggBuilder(egg)
+    
+    # builder.build_rand_line()
+
+    # for _ in range(1):
+    #     env = egg.get_env()
+    #     # Random initial register vals
+    #     env.ax = Byte(random.randint(1, 3))
+    #     env.bx = Byte(random.randint(10, 12))
+    #     env.cx = Byte(random.randint(35, 38))
+    #     env.dx = Byte(random.randint(-6, -3))
+    #     print('initial:', env.ax, env.bx, env.cx, env.dx)
+    #     while not env.done:
+    #         env.step()
+    #     for v in egg.instr:
+    #         print(v)
+    #     print('final:', env.ax, env.bx, env.cx, env.dx)
+
 
