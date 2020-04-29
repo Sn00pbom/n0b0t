@@ -168,6 +168,19 @@ async def pay_command(context):
     else:
         await insufficient_funds(context)
 
+@client.command(name='buypin', pass_context=True)
+async def buypin_command(context):
+    author = context.message.author
+    args = context.message.content.split(' ')
+    cost = 2
+    if(curr_man.user_has_value(author.id, cost)):
+        pin_content = context.message.content[context.message.content.find(' '):len(context.message.content)] + "\n -" + author.mention
+        curr_man.wallets[str(author.id)] -= cost
+        msg = await context.message.channel.send(pin_content)
+        await msg.pin()
+    else:
+        await insufficient_funds(context)
+
 
 @client.command(name='balance', pass_context=True, aliases = ['wallet', 'bal', 'money'])
 async def balance_command(context):
