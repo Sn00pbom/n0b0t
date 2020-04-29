@@ -172,6 +172,9 @@ async def pay_command(context):
 async def buypin_command(context):
     author = context.message.author
     args = context.message.content.split(' ')
+    if len(args) == 1:
+        await context.message.channel.send('Usage: .buypin [MESSAGE]')
+        return
     cost = 10
     if(curr_man.user_has_value(author.id, cost)):
         pin_content = context.message.content[context.message.content.find(' '):len(context.message.content)] + "\n -" + author.mention
