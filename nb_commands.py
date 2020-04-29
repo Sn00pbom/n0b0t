@@ -172,7 +172,7 @@ async def pay_command(context):
 async def buypin_command(context):
     author = context.message.author
     args = context.message.content.split(' ')
-    cost = 2
+    cost = 10
     if(curr_man.user_has_value(author.id, cost)):
         pin_content = context.message.content[context.message.content.find(' '):len(context.message.content)] + "\n -" + author.mention
         curr_man.wallets[str(author.id)] -= cost
@@ -381,3 +381,4 @@ Example Usage:
     .memeviolation @targetsName 0 *MSG```
         """
         await context.message.channel.send(m)
+
