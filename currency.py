@@ -22,9 +22,8 @@ class CurrencyManager(object):
         return True
 
     def user_has_value(self, uid, amount):
-        if not check_user(uid): return False
+        if not self.check_user(uid): return False
         uid = str(uid)
-        self.check_user(uid)
         return self.wallets[uid] >= amount
 
     async def post_shekel(self):
