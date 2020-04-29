@@ -18,8 +18,11 @@ class CurrencyManager(object):
         uid = str(uid)
         if uid not in self.wallets.keys():
             self.wallets[uid] = 0
+            return False
+        return True
 
     def user_has_value(self, uid, amount):
+        if not check_user(uid): return False
         uid = str(uid)
         self.check_user(uid)
         return self.wallets[uid] >= amount
