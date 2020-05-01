@@ -1,0 +1,13 @@
+# Jetbrains
+.idea
+# VS Code
+.vscode
+
+# Python compiled bins
+__pycache__
+
+token.txt
+money_log.txt
+wallets.json
+secrets.json
+user_dat.db
