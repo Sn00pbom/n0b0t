@@ -183,7 +183,63 @@ async def buypin_command(context):
         await msg.pin()
     else:
         await insufficient_funds(context)
+        
+@client.command(name='buypinremoval', pass_context=True)
+async def buypinremoval_command(context):
+    author = context.message.author
+    argv = context.message.content.split(' ')
+    if len(argv) == 1:
+        await context.message.channel.send('Usage: .buypinremoval [MESSAGE ID]')
+        return
+    
+    pat = re.compile(r'.*/(\d+)')
+    r = pat.findall(argv[1])
+    try:
+        rid = r[0]
+    except:
+        rid = argv[1]
+    
+    cost = 15 #arbitrary. i dont know how much this should cost
+    
+    try:
+        if(curr_man.user_has_value(author.id, cost)):
+            msg = await context.message.channel.fetch_message(rid)
+            await msg.unpin()
+            await context.message.channel.send("{} paid to remove pin: ".format(author.name)) 
+            await context.message.channel.send(">>> {}".format(msg.content)) 
+        else:
+            await insufficient_funds(context)
+    except:
+        await context.message.channel.send('Usage: .buypinremoval [MESSAGE ID]')
+    
 
+        
+ #--------------------------------------------
+#experimental. lets see where this goes...
+@client.command(name='revolutionary', pass_context=True)
+async def revolutionary_command(context):
+    return
+    author = context.message.author
+    args = context.message.content.split(' ')
+    
+    if len(args) == 1:
+        await context.message.channel.send('Usage : .revolutionary [1/0 become revolutionary yes/no]')
+        return
+    
+    try:
+        rev_status = int(args[1])
+        if rev_status < 1:
+                rev_status = 0
+                await context.message.channel.send('{} has betrayed the worker\'s of the server & turned his back on the revolution.'.format(author.name))
+        else:
+                rev_status = 1
+                await context.message.channel.send('{} has joined the revolution & given up their tokens to fight for the proletariat!'.format(author.name))
+        
+        curr_man.revolutionary_status[str(author.id)] = rev_status
+    except:
+        await context.message.channel.send('Usage : .revolutionary [1/0 become revolutionary yes/no]')
+        return
+#--------------------------------------------
 
 @client.command(name='balance', pass_context=True, aliases = ['wallet', 'bal', 'money'])
 async def balance_command(context):
@@ -287,7 +343,6 @@ async def delete_command(context):
         message = "{} {}".format(argv[0], rid)
         counsel.try_vote_act(message, remove_msg, 'delete')
         await counsel.query(message, author, 'delete', context.message.channel)
-        
 
 @client.command(name='mum',
                 pass_context=True)
