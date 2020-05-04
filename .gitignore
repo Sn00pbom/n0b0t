@@ -10,4 +10,4 @@ token.txt
 money_log.txt
 wallets.json
 secrets.json
-user_dat.db
+users.db
