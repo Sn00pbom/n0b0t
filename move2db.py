@@ -1,3 +1,8 @@
+"""
+Use this tool to move old json database to sql database
+Run init before running port
+Use print to check if the port was successfull
+"""
 import sqlite3
 import json
 from sys import argv
