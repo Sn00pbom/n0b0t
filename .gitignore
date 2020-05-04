@@ -11,3 +11,4 @@ money_log.txt
 wallets.json
 secrets.json
 users.db
+users.db-journal
