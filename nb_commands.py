@@ -163,8 +163,11 @@ async def pay_command(context):
     if curr_man.user_has_value(author.id, amount):
         curr_man.wallets[str(target_user.id)] += amount
         curr_man.wallets[str(author.id)] -= amount
-        await context.message.channel.send("{} paid {} {}{}!".format(
-            author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount))
+        for _ in range(3): args.pop(0)
+        reason_msg = ' for "{}"'.format(' '.join(args)) if len(args) != 0 else '!'
+        # reason_msg = 'db'
+        await context.message.channel.send("{} paid {} {}{}{}".format(
+            author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount, reason_msg))
     else:
         await insufficient_funds(context)
 
