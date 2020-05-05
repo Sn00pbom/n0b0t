@@ -45,7 +45,7 @@ class CurrencyManager(object):
         try:
             quantity, msg_handle = self.posts[shekel_id]
             del self.posts[shekel_id]
-            self.do_transaction(uid, quantity)
+            await self.do_transaction(uid, quantity)
             await msg_handle.delete()
             await claim_msg.delete()
             with open('money_log.txt', 'a') as f:
