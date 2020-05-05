@@ -36,6 +36,7 @@ class UserDB(object):
 
         if not self.has_user(uid):
             fail()
+            self.add_user(uid)
             return False
 
         self.c.execute('SELECT money FROM users WHERE id={}'.format(uid))
