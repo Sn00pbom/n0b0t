@@ -26,7 +26,7 @@ class CurrencyManager(object):
         with open('money_log.txt', 'a') as f:
             f.write('[POST] {} -> {}, {}\n'.format(datetime.datetime.now(), quantity, address))
 
-    async def claim_shekel(self, user_id, shekel_id, claim_msg):
+    async def claim_shekel(self, uid, shekel_id, claim_msg):
         try:
             quantity, msg_handle = self.posts[shekel_id]
             del self.posts[shekel_id]
@@ -34,7 +34,7 @@ class CurrencyManager(object):
             await msg_handle.delete()
             await claim_msg.delete()
             with open('money_log.txt', 'a') as f:
-                f.write('[CLAIM] {} -> {}, {}, {}\n'.format(datetime.datetime.now(), user_id, quantity, shekel_id))
+                f.write('[CLAIM] {} -> {}, {}, {}\n'.format(datetime.datetime.now(), uid, quantity, shekel_id))
 
         except:
             return

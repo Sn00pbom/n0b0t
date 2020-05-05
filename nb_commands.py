@@ -5,13 +5,14 @@ from io import BytesIO
 import discord
 from discord.ext import commands
 
-from globals import client, counsel, curr_man
+from globals import client, counsel, curr_man, userdb
 from memeviolation import MemeViolation
 
 
 async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
+
 
 @client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
 async def anonymize_command(context):
@@ -22,24 +23,19 @@ async def anonymize_command(context):
         assert len(args) >= 3
         converter = commands.MemberConverter()
         recipient = await converter.convert(context, args[1])
-
-        curr_man.check_user(author.id)
-        if curr_man.user_has_value(author.id, ANON_COST):
-
-            usr_msg = "Received anon message!\n```\n{}\n```".format(' '.join(args[2::]))
-            rec_dm = await recipient.create_dm()
-            
-            await rec_dm.send(usr_msg)
-            auth_dm = await author.create_dm()
-            await context.message.delete()
-            await auth_dm.send("Message Sent to {}! Thank you for your business!".format(recipient.mention))
-
-            curr_man.wallets[str(author.id)] -= ANON_COST
-        else:
-            await insufficient_funds(context)
-
     except:
         await context.message.channel.send('Usage: .anonymize @RECIPIENT *MSG')
+        return
+
+    async def send_msg():
+        usr_msg = "Received anon message!\n```\n{}\n```".format(' '.join(args[2::]))
+        rec_dm = await recipient.create_dm()
+        await rec_dm.send(usr_msg)
+        auth_dm = await author.create_dm()
+        await context.message.delete()
+        await auth_dm.send("Message Sent to {}! Thank you for your business!".format(recipient.mention))
+    
+    await curr_man.do_transaction(author.id, -ANON_COST, succ=send_msg, fail=lambda: insufficient_funds(context))
 
 
 @client.command(name='paytable', pass_context=True)
@@ -61,88 +57,80 @@ async def spin_command(context):
     else:
         SPIN_COST = 1
 
-    # check author wallet and remove cost
-    if not curr_man.user_has_value(author.id, SPIN_COST):
-        await insufficient_funds(context)
-        return
-    else:
-        curr_man.wallets[str(author.id)] -= SPIN_COST
+    async def do_spin():
+        pay_1 = [4000, 100, 75, 30, 20, 10, 5, 2]
+        pay_2 = [8000, 200, 150, 60, 40, 20, 10, 4]
+        pay_3 = [12000, 300, 255, 90, 60, 30, 15, 6]
+        pay = [pay_1, pay_2, pay_3][SPIN_COST-1]
 
-    pay_1 = [4000, 100, 75, 30, 20, 10, 5, 2]
-    pay_2 = [8000, 200, 150, 60, 40, 20, 10, 4]
-    pay_3 = [12000, 300, 255, 90, 60, 30, 15, 6]
-    pay = [pay_1, pay_2, pay_3][SPIN_COST-1]
+        # tier 1 is 0
+        tier2 = range(1, 3)
+        tier3 = range(3, 6)
+        tier4 = range(6, 10)
+        tier5 = range(10, 15)
+        tier6 = range(15, 22)
 
-    # tier 1 is 0
-    tier2 = range(1, 3)
-    tier3 = range(3, 6)
-    tier4 = range(6, 10)
-    tier5 = range(10, 15)
-    tier6 = range(15, 22)
+        def wheel_vals(i):
+            vals = [
+                ':peach:',
+                ':japanese_goblin:',
+                ':watermelon:',
+                ':eggplant:',
+                ':pick:',
+                ':poo:',
+                ':middle_finger:'
+            ]
+            if i is 0: pass
+            elif i in tier2: i = 1
+            elif i in tier3: i = 2
+            elif i in tier4: i = 3
+            elif i in tier5: i = 4
+            elif i in tier6: i = 5
+            else: i = 6
+            return vals[i]
 
-    def wheel_vals(i):
-        vals = [
-            ':peach:',
-            ':japanese_goblin:',
-            ':watermelon:',
-            ':eggplant:',
-            ':pick:',
-            ':poo:',
-            ':middle_finger:'
-            # ':teddy_bear:',
-            # ':earth_americas:',
-            # ':moyai:',
-            # ':man_mage:'
-        ]
-        if i is 0: pass
-        elif i in tier2: i = 1
-        elif i in tier3: i = 2
-        elif i in tier4: i = 3
-        elif i in tier5: i = 4
-        elif i in tier6: i = 5
-        else: i = 6
-        return vals[i]
+        N_VALUES = 50
+        # wheel outcome values
+        w1 = random.choice(range(N_VALUES))
+        w2 = random.choice(range(N_VALUES))
+        w3 = random.choice(range(N_VALUES))
+        frmts = ''
+        if w1 is 0 and w2 is 0 and w3 is 0:  # jackpot case (tier 1)
+            frmts += ':rotating_light: ' \
+                    ':regional_indicator_j: :regional_indicator_a: :regional_indicator_c: :regional_indicator_k:' \
+                    ':b: :regional_indicator_o: :regional_indicator_t:' \
+                    ' :rotating_light: @everyone\n'
+            o = pay[0]
+        elif w1 in tier2 and w2 in tier2 and w3 in tier2:
+            o = pay[1]
+        elif w1 in tier3 and w2 in tier3 and w3 in tier3:
+            o = pay[2]
+        elif w1 in tier4 and w2 in tier4 and w3 in tier4:
+            o = pay[3]
+        elif w1 in tier5 and w2 in tier5 and w3 in tier5:
+            o = pay[4]
+        elif w1 in tier6 and w2 in tier6 and w3 in tier6:
+            o = pay[5]
+        elif (w1 in tier6 and w2 in tier6) or (w2 in tier6 and w3 in tier6) or (w1 in tier6 and w3 in tier6):
+            o = pay[6]
+        elif w1 in tier6 or w2 in tier6 or w3 in tier6:
+            o = pay[7]
+        else:
+            o = 0
 
-    N_VALUES = 50
-    # wheel outcome values
-    w1 = random.choice(range(N_VALUES))
-    w2 = random.choice(range(N_VALUES))
-    w3 = random.choice(range(N_VALUES))
-    frmts = ''
-    if w1 is 0 and w2 is 0 and w3 is 0:  # jackpot case (tier 1)
-        frmts += ':rotating_light: ' \
-                 ':regional_indicator_j: :regional_indicator_a: :regional_indicator_c: :regional_indicator_k:' \
-                 ':b: :regional_indicator_o: :regional_indicator_t:' \
-                 ' :rotating_light: @everyone\n'
-        o = pay[0]
-    elif w1 in tier2 and w2 in tier2 and w3 in tier2:
-        o = pay[1]
-    elif w1 in tier3 and w2 in tier3 and w3 in tier3:
-        o = pay[2]
-    elif w1 in tier4 and w2 in tier4 and w3 in tier4:
-        o = pay[3]
-    elif w1 in tier5 and w2 in tier5 and w3 in tier5:
-        o = pay[4]
-    elif w1 in tier6 and w2 in tier6 and w3 in tier6:
-        o = pay[5]
-    elif (w1 in tier6 and w2 in tier6) or (w2 in tier6 and w3 in tier6) or (w1 in tier6 and w3 in tier6):
-        o = pay[6]
-    elif w1 in tier6 or w2 in tier6 or w3 in tier6:
-        o = pay[7]
-    else:
-        o = 0
+        if o is 0:
+            payfs = 'Better luck next time!'
+        else:
+            payfs = '→ Paying {} {}{}'.format(author.mention, curr_man.CURRENCY_SYMBOl, o)
 
-    if o is 0:
-        payfs = 'Better luck next time!'
-    else:
-        payfs = '→ Paying {} {}{}'.format(author.mention, curr_man.CURRENCY_SYMBOl, o)
+        frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ {}\n╚══════════╝'
 
-    frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ {}\n╚══════════╝'
+        await curr_man.do_transaction(author.id, o)  # add money to user
+        await context.message.channel.send(frmts.format(
+            wheel_vals(w1), wheel_vals(w2), wheel_vals(w3), payfs
+        ))
 
-    curr_man.wallets[str(author.id)] += o
-    await context.message.channel.send(frmts.format(
-        wheel_vals(w1), wheel_vals(w2), wheel_vals(w3), payfs
-    ))
+    await curr_man.do_transaction(author.id, -SPIN_COST, succ=do_spin, fail=lambda: insufficient_funds(context))
 
 
 @client.command(name='pay', pass_context=True)
@@ -157,19 +145,18 @@ async def pay_command(context):
         target_user = await converter.convert(context, args[1])
     except:
         return
-
-    curr_man.check_user(author.id)
-    curr_man.check_user(target_user.id)
-    if curr_man.user_has_value(author.id, amount):
-        curr_man.wallets[str(target_user.id)] += amount
-        curr_man.wallets[str(author.id)] -= amount
+    
+    async def pay_target():
+        await curr_man.do_transaction(target_user.id, amount)
         for _ in range(3): args.pop(0)
         reason_msg = ' for "{}"'.format(' '.join(args)) if len(args) != 0 else '!'
-        # reason_msg = 'db'
         await context.message.channel.send("{} paid {} {}{}{}".format(
             author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount, reason_msg))
-    else:
-        await insufficient_funds(context)
+
+    await curr_man.do_transaction(author.id, -amount,
+        succ=pay_target,
+        fail=lambda: insufficient_funds(context))
+
 
 @client.command(name='buypin', pass_context=True)
 async def buypin_command(context):
@@ -178,15 +165,15 @@ async def buypin_command(context):
     if len(args) == 1:
         await context.message.channel.send('Usage: .buypin [MESSAGE]')
         return
-    cost = 10
-    if(curr_man.user_has_value(author.id, cost)):
+    COST = 10
+    async def do_pin():
         pin_content = context.message.content[context.message.content.find(' '):len(context.message.content)] + "\n -" + author.mention
-        curr_man.wallets[str(author.id)] -= cost
         msg = await context.message.channel.send(pin_content)
         await msg.pin()
-    else:
-        await insufficient_funds(context)
+
+    await curr_man.do_transaction(author.id, -COST, succ=do_pin, fail=lambda: insufficient_funds(context))
         
+
 @client.command(name='buypinremoval', pass_context=True)
 async def buypinremoval_command(context):
     author = context.message.author
@@ -202,20 +189,20 @@ async def buypinremoval_command(context):
     except:
         rid = argv[1]
     
-    cost = 15 #arbitrary. i dont know how much this should cost
+    COST = 15 #arbitrary. i dont know how much this should cost
     
     try:
-        if(curr_man.user_has_value(author.id, cost)):
-            msg = await context.message.channel.fetch_message(rid)
+        msg = await context.message.channel.fetch_message(rid)
+        async def do_rmpin():
             await msg.unpin()
             await context.message.channel.send("{} paid to remove pin: ".format(author.name)) 
             await context.message.channel.send(">>> {}".format(msg.content)) 
-        else:
-            await insufficient_funds(context)
+
+        await curr_man.do_transaction(author.id, -COST, succ=do_rmpin, fail=lambda: insufficient_funds(context))
+
     except:
         await context.message.channel.send('Usage: .buypinremoval [MESSAGE ID]')
     
-
         
  #--------------------------------------------
 #experimental. lets see where this goes...
@@ -244,14 +231,12 @@ async def revolutionary_command(context):
         return
 #--------------------------------------------
 
+
 @client.command(name='balance', pass_context=True, aliases = ['wallet', 'bal', 'money'])
 async def balance_command(context):
     author = context.message.author
     channel = await author.create_dm()
-    try:
-        quantity = curr_man.wallets[str(author.id)]
-    except:
-        quantity = 0
+    quantity = curr_man.get_money(author.id)
     await channel.send("Your wallet contains: " + curr_man.CURRENCY_SYMBOl + str(quantity))
     await context.message.delete()
 
@@ -265,7 +250,7 @@ async def claim_command(context):
     if(len(matches) == 2):
         author = context.message.author
         mid = matches[1]
-        await curr_man.claim_shekel(str(author.id), mid, context.message)
+        await curr_man.claim_shekel(author.id, mid, context.message)
 
 
 @client.command(name='coinflip', pass_context=True, aliases=['coin', 'flip', 'cf'])
@@ -347,6 +332,7 @@ async def delete_command(context):
         counsel.try_vote_act(message, remove_msg, 'delete')
         await counsel.query(message, author, 'delete', context.message.channel)
 
+
 @client.command(name='mum',
                 pass_context=True)
 async def mum_command(context):
@@ -355,6 +341,7 @@ async def mum_command(context):
         " Thine mother art a delectable, fine woman and a scholar, good sir."
     ]
     await context.message.channel.send(context.message.author.mention + random.choice(response))
+
 
 @client.command(name='n0b0t',
                 pass_context=True)
@@ -395,35 +382,7 @@ async def memeviolation_command(context):
     msg = context.message.content
     args = msg.split(' ')
     args.pop(0)
-    if len(args) >= 2:
-        target = args.pop(0)
-        code = args.pop(0)
-        try:
-            code = int(code)
-            code = list(str(code))
-            code = [int(v) for v in code]
-            converter = commands.MemberConverter()
-            target = await converter.convert(context, target)
-        except ValueError as e:
-            return
-
-        async def send_mv():
-            PENALTY = 15
-            other_text = ' '.join(args)
-            mv = MemeViolation(code, sender, other_text=other_text)
-            img = mv.generate()
-            with BytesIO() as img_bin:
-                img.save(img_bin, 'PNG')
-                img_bin.seek(0)
-                await context.message.channel.send(":rotating_light: MEME VIOLATION :rotating_light:\nIssued to -> {}! penalized {}{}".format(target.mention, curr_man.CURRENCY_SYMBOl, PENALTY),
-                                                    file=discord.File(fp=img_bin, filename='mv.png'))
-            curr_man.check_user(target)
-            if curr_man.user_has_value(target.id, PENALTY):
-                curr_man.wallets[str(target.id)] -= PENALTY
-
-        counsel.try_vote_act(msg, send_mv, 'memeviolation')
-        await counsel.query(msg, sender, 'memeviolation', context.message.channel)
-    else:
+    async def post_help():
         m = """```
 1: Madding Too Fast
 2: Louding Too Fast
@@ -443,3 +402,32 @@ Example Usage:
         """
         await context.message.channel.send(m)
 
+    if len(args) >= 2:
+        target = args.pop(0)
+        code = args.pop(0)
+        try:
+            code = int(code)
+            code = list(str(code))
+            code = [int(v) for v in code]
+            converter = commands.MemberConverter()
+            target = await converter.convert(context, target)
+        except ValueError:
+            await post_help()
+            return
+
+        async def send_mv():
+            PENALTY = 15
+            other_text = ' '.join(args)
+            mv = MemeViolation(code, sender, other_text=other_text)
+            img = mv.generate()
+            with BytesIO() as img_bin:
+                img.save(img_bin, 'PNG')
+                img_bin.seek(0)
+                await context.message.channel.send(":rotating_light: MEME VIOLATION :rotating_light:\nIssued to -> {}! penalized {}{}".format(target.mention, curr_man.CURRENCY_SYMBOl, PENALTY),
+                                                    file=discord.File(fp=img_bin, filename='mv.png'))
+            await curr_man.do_transaction(target.id, -PENALTY)
+
+        counsel.try_vote_act(msg, send_mv, 'memeviolation')
+        await counsel.query(msg, sender, 'memeviolation', context.message.channel)
+    else:
+        await post_help()
