@@ -1,4 +1,6 @@
 import sqlite3
+import inspect
+
 
 class UserDB(object):
     """Singleton class to do SQL database transactions"""
@@ -19,41 +21,23 @@ class UserDB(object):
         self.c.execute('SELECT * FROM users WHERE id={}'.format(uid))
         return len(self.c.fetchall())
 
-    def do_transaction(self, uid, amount, succ=lambda: None, fail=lambda: None):
-        """
-        Modify a user's money value by amount (+/-)
-        Checks if user has sufficient funds if amount is negative
-
-        Parameters:
-        uid (int/str): User's id
-        amount (int): Amount to modify user's value by
-        succ (fun): Success callback function
-        fail (fun): Failure callback function
-
-        Returns:
-        success (bool)
-        """
-
-        if not self.has_user(uid):
-            fail()
+    def get_user_data(self, uid):
+        if self.has_user(uid):
+            self.c.execute('SELECT * FROM users WHERE id={}'.format(uid))
+            return self.c.fetchone()
+        else:
             self.add_user(uid)
-            return False
+            return 0
 
-        self.c.execute('SELECT money FROM users WHERE id={}'.format(uid))
-        money = self.c.fetchone()[0]
+    def get_user_value(self, uid, field):
+        if self.has_user(uid):
+            self.c.execute('SELECT {} FROM users WHERE id={}'.format(field, uid))
+            return self.c.fetchone()[0]
+        else:
+            self.add_user(uid)
+            return 0
 
-        if amount < 0 and money < abs(amount):  # Negative amount case with insuff funds
-            fail()
-            return False
-        
-        self.c.execute('UPDATE users SET money={} WHERE id={}'.format(money + amount, uid))
-        succ()
-        return True
-
-    def print(self):
-        """Debugging print"""
-        self.c.execute('SELECT * FROM users')
-        print(self.c.fetchall())
-
-        
-
+    def set_user_value(self, uid, field, value):
+        if not self.has_user(uid): self.add_user(uid)
+        self.c.execute('UPDATE users SET {}={} WHERE id={}'.format(field, value, uid))
+        self.conn.commit()
