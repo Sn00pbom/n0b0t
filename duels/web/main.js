@@ -29,7 +29,7 @@ class Node {
   
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = last_was_node && this == target_node? 'red' : 'white';
         ctx.fill();
         ctx.stroke();
 
@@ -59,7 +59,7 @@ class Node {
 let nodes;
 let mouse_data;
 let bounds;
-let target_node;
+let last_was_node;
 // </globals>
 
 let Render = () => {
@@ -71,15 +71,18 @@ let Render = () => {
     });
 };
 
+function calc_dist(obja, objb){
+    let a = obja.x - objb.x;
+    let b = obja.y - objb.y;
+    return Math.sqrt(a**2 + b**2);
+}
+
 let GetClosestNode = () => {
     let closest = nodes[0];
     let closest_dist = 9999;
 
     nodes.forEach(node => {
-        let a = node.x - mouse_data.x;
-        let b = node.y - mouse_data.y;
-        
-        let dist = Math.sqrt(a * a + b * b);
+        let dist = calc_dist(node, mouse_data);
         
         if(dist < closest_dist)
         {
@@ -92,18 +95,27 @@ let GetClosestNode = () => {
 };
 
 let OnClick = () => {
-    if(target_node == null)
-    {
-        target_node = GetClosestNode();
+
+    var dist = calc_dist(GetClosestNode(), mouse_data);
+    if (dist < 30){ // user clicked node
+        if(last_was_node){ // clicked 2 nodes, time to link
+            var last_node = target_node;
+            target_node = GetClosestNode();
+            last_node.ConnectNode(target_node.id);
+            target_node.ConnectNode(last_node.id);
+        }
+        else{
+            target_node = GetClosestNode();
+        }
+        last_was_node = true;
     }
-    else
-    {
-        nodes[nodes.length] = new Node(mouse_data.x, mouse_data.y, "", "", nodes.length);
-        nodes[nodes.length - 1].ConnectNode(target_node.id);
-
-        nodes[target_node.id].ConnectNode(nodes[nodes.length-1]);
-
-        target_node = null;
+    else{ // user didn't click node
+        var nid = nodes.length; // new id
+        nodes[nid] = new Node(mouse_data.x, mouse_data.y, "", "", nodes.length);
+        nodes[nid].ConnectNode(target_node.id);
+        target_node.ConnectNode(nid);
+        console.log(nodes);
+        last_was_node = false;
     }
 };
 
@@ -119,13 +131,11 @@ let SetupListeners = () => {
 };
 
 let SetupGlobals = () => {
+    last_was_node = false;
     nodes = [];
     nodes[0] = new Node(res.x / 2 - 10, res.y / 2 - 10, "", "", nodes.length);
-
     target_node = nodes[0];
-
     mouse_data = {x: 0, y: 0};
-
     bounds = canvas.getBoundingClientRect();
 };
 

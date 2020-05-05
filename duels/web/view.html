@@ -1,4 +1,20 @@
 <html>
-    <canvas id="canvas" width="1280" height="720"></canvas>
+<body>
+    <div>
+        <canvas id="canvas" width="1280" height="720"></canvas>
+    </div>
+    <div>
+        <button id="submit" onclick="download(JSON.stringify(nodes), 'nodes.json', 'text/plain');">Save JSON</button>
+    </div>
     <script src="main.js"></script>
+    <script>
+        function download(content, fileName, contentType) {
+            var a = document.createElement("a");
+            var file = new Blob([content], {type: contentType});
+            a.href = URL.createObjectURL(file);
+            a.download = fileName;
+            a.click();
+        }
+    </script>
+</body>
 </html>
