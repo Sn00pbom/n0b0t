@@ -41,3 +41,9 @@ class UserDB(object):
         if not self.has_user(uid): self.add_user(uid)
         self.c.execute('UPDATE users SET {}={} WHERE id={}'.format(field, value, uid))
         self.conn.commit()
+
+    def print(self):
+        """Debugging print"""
+        self.c.execute('SELECT * FROM users')
+        print(self.c.fetchall())
+
