@@ -2,13 +2,14 @@ import sqlite3
 
 class UserDB(object):
     """Singleton class to do SQL database transactions"""
+    DEFAULTS = "{}, '', 0"
     def __init__(self):
         self.conn = sqlite3.connect('users.db')
         self.c = self.conn.cursor()
 
     def add_user(self, uid):
         try:
-            defaults = "{}, '', 0".format(uid)  # id with no pw and no money
+            defaults = self.DEFAULTS.format(uid)  # id with no pw and no money
             self.c.execute("INSERT INTO users VALUES({})".format(defaults))
             self.conn.commit()
         except sqlite3.IntegrityError:
