@@ -1,0 +1,20 @@
+{
+    "token": "",
+    "tree-channel-id": 1234567890,
+    "tree-drop-range": [20, 45],
+    "role": "pleb",
+    "vote": {
+        "anoint": 2,
+        "exile": 7,
+        "kick": 10,
+        "ban": 12,
+        "delete": 3,
+        "memeviolation": 5
+    },
+    "cost": {
+        "anonymize": 3,
+        "buypin": 10,
+        "buypinremoval": 15,
+        "memeviolation": 15
+    }
+}
