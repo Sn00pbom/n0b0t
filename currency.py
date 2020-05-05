@@ -14,21 +14,6 @@ class CurrencyManager(object):
         self.posts = {}
         self.userdb = userdb
 
-    # def check_user(self, uid):
-    #     """DEPRECATED - Use UserDB"""
-    #     return self.userdb.has_user(uid)
-
-    # def user_has_value(self, uid, amount):
-    #     """DEPRECATED - Use UserDB"""
-    #     # c = sqlite3.connect('users.db').cursor()
-    #     # c.execute('SELECT money FROM users WITH id={}'.format(uid))
-    #     # a = c.fetchall()
-    #     # return a[0] >= amount
-
-
-    #     if not self.check_user(uid): return False
-    #     uid = str(uid)
-    #     return self.wallets[uid] >= amount
     def get_money(self, uid):
         return self.userdb.get_user_value(uid, 'money')
 
@@ -79,8 +64,8 @@ class CurrencyManager(object):
             if fail: await fail()
             return False
         
-        udb.set_user_value(uid, 'money', money + amount)
         if succ: await succ()
+        udb.set_user_value(uid, 'money', money + amount)
         return True
 
 
