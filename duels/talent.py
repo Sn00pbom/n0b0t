@@ -12,6 +12,7 @@ class TalentNode(object):
         self.desc = ""
         self.id = id
         self.cons = []
+        self.alloc = False
 
 
 class TalentGraph(object):
@@ -25,6 +26,7 @@ class TalentGraph(object):
             node.cons = [i for i in nodes_dat[node.id]['cons']]
 
     def test_valid(self, node_is, visited_is=list(), pos=0):
+        if len(node_is) > self.MAX_POINTS: return False
         at_node = self.nodes[pos]
         visited_is.append(pos)
 
