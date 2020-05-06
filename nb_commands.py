@@ -14,14 +14,14 @@ async def insufficient_funds(context):
                                        .format(context.message.author.mention))
 
 
-@client.command(name='pwd', pass_context=True)
-async def pwd_command(context):
+@client.command(name='pswd', pass_context=True)
+async def pswd_command(context):
     channel = context.message.channel
     args = context.message.content.split(' ')
     args.pop(0)
 
     async def usg():
-        await channel.send('Usage: .pwd [get|set] PWD\n(Must be in a DM!)')
+        await channel.send('Set a password!\nUsage: .pswd [get|set] PWD\n(Must be in a DM!)')
 
     if not isinstance(channel, discord.DMChannel):
         await usg()
