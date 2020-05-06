@@ -14,6 +14,42 @@ async def insufficient_funds(context):
                                        .format(context.message.author.mention))
 
 
+@client.command(name='pwd', pass_context=True)
+async def pwd_command(context):
+    channel = context.message.channel
+    args = context.message.content.split(' ')
+    args.pop(0)
+
+    async def usg():
+        await channel.send('Usage: .pwd [get|set] PWD\n(Must be in a DM!)')
+
+    if not isinstance(channel, discord.DMChannel):
+        await usg()
+        return
+
+    if len(args):
+        cmd = args.pop(0)
+        uid = context.message.author.id
+        if cmd == 'get':
+            p = userdb.get_user_value(uid, 'pwd')
+            if p != '':
+                await channel.send('Current password: {}'.format(p))
+            else:
+                await channel.send('No password set!')
+
+        elif cmd == 'set':
+            if not len(args):
+                await usg()
+                return
+            userdb.set_user_value(uid, 'pwd', args.pop(0))
+            await channel.send('Password set!')
+        else:
+            await usg()
+    else:
+        await usg()
+        return
+
+
 @client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
 async def anonymize_command(context):
     ANON_COST = 2
