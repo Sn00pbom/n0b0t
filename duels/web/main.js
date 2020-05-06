@@ -34,6 +34,7 @@ class Node {
         ctx.fillStyle = this == target_node ? 'red' : 'white';
         ctx.fill();
         ctx.stroke();
+        ctx.fillText(this.id, this.x, this.y + this.radius + 10);
 
         for(let i = 0; i < this.cons.length; i++)
         {
