@@ -108,6 +108,8 @@ let Init = () => {
 
     //SetupListeners();
 
+    Unpack();
+
     setInterval(Think, 16.7);
 };
 
