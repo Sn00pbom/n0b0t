@@ -19,7 +19,9 @@ class Node {
     
     ConnectNode(index)
     {
-        this.cons.push(index);
+        if(!this.cons.includes(index)){
+            this.cons.push(index);
+        }
     }
 
     Think()
@@ -29,7 +31,7 @@ class Node {
   
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = last_was_node && this == target_node? 'red' : 'white';
+        ctx.fillStyle = this == target_node ? 'red' : 'white';
         ctx.fill();
         ctx.stroke();
 
@@ -59,7 +61,7 @@ class Node {
 let nodes;
 let mouse_data;
 let bounds;
-let last_was_node;
+let put_mode;
 // </globals>
 
 let Render = () => {
@@ -75,6 +77,11 @@ function calc_dist(obja, objb){
     let a = obja.x - objb.x;
     let b = obja.y - objb.y;
     return Math.sqrt(a**2 + b**2);
+}
+
+function connect_pair(node_a, node_b){
+    node_a.ConnectNode(node_b.id);
+    node_b.ConnectNode(node_a.id);
 }
 
 let GetClosestNode = () => {
@@ -95,27 +102,22 @@ let GetClosestNode = () => {
 };
 
 let OnClick = () => {
-
-    var dist = calc_dist(GetClosestNode(), mouse_data);
-    if (dist < 30){ // user clicked node
-        if(last_was_node){ // clicked 2 nodes, time to link
-            var last_node = target_node;
-            target_node = GetClosestNode();
-            last_node.ConnectNode(target_node.id);
-            target_node.ConnectNode(last_node.id);
+    if(put_mode){
+        var close_node = GetClosestNode();
+        var dist = calc_dist(close_node, mouse_data);
+        if(dist < 30){
+            connect_pair(target_node, close_node);
+            // target_node = close_node; // set target to connected node
         }
         else{
-            target_node = GetClosestNode();
+            var nid = nodes.length; // new id
+            nodes[nid] = new Node(mouse_data.x, mouse_data.y, "", "", nid);
+            connect_pair(nodes[nid], target_node);
+            // target_node = nodes[nid]; // set target to new node
         }
-        last_was_node = true;
     }
-    else{ // user didn't click node
-        var nid = nodes.length; // new id
-        nodes[nid] = new Node(mouse_data.x, mouse_data.y, "", "", nodes.length);
-        nodes[nid].ConnectNode(target_node.id);
-        target_node.ConnectNode(nid);
-        console.log(nodes);
-        last_was_node = false;
+    else{
+        target_node = GetClosestNode();
     }
 };
 
@@ -131,7 +133,7 @@ let SetupListeners = () => {
 };
 
 let SetupGlobals = () => {
-    last_was_node = false;
+    put_mode = true;
     nodes = [];
     nodes[0] = new Node(res.x / 2 - 10, res.y / 2 - 10, "", "", nodes.length);
     target_node = nodes[0];
@@ -152,3 +154,21 @@ let Init = () => {
 };
 
 Init();
+
+function toggle_mode(){
+    // toggle put mode and update page text
+    if(put_mode){
+        put_mode = false;
+        document.getElementById("status").innerHTML = "SELECT";
+    }
+    else{
+        put_mode = true;
+        document.getElementById("status").innerHTML = "PUT";
+    }
+}
+
+document.addEventListener("keypress", function onEvent(event) {
+    if (event.key === "f") {
+        toggle_mode();
+    }
+});
