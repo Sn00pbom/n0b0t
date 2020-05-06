@@ -1,5 +1,5 @@
 import json
-from copy import deepcopy
+
 
 class Talent(object):
     def __init__(self):
@@ -18,19 +18,30 @@ class TalentGraph(object):
     """Main object to keep track of and load talent graph data"""
     MAX_POINTS = 10
     def __init__(self):
-        with open('talents.json', 'r') as f:
+        with open('duels/talents.json', 'r') as f:
             nodes_dat = json.loads(f.read())
         self.nodes = [TalentNode(i) for i in range(len(nodes_dat))]
         for node in self.nodes:
-            node.cons = [TalentNode(i) for i in nodes_dat[node.id]['cons']]
+            node.cons = [i for i in nodes_dat[node.id]['cons']]
 
-    def test_valid(self, node_is, visited_is, pos=0):
-        pass
-        # at_node = self.nodes[pos]
-        # visited_is.append(at_node)
-        # for to_node_i in at_node.cons:
-        #     to_node = self.nodes[to_node_i]
-        #     self.test_valid(deepcopy)
+    def test_valid(self, node_is, visited_is=list(), pos=0):
+        at_node = self.nodes[pos]
+        visited_is.append(pos)
 
+        if pos in node_is: node_is.remove(pos)
+        else: return
+
+        for to_node_i in at_node.cons:
+            if to_node_i in node_is and not to_node_i in visited_is:
+                self.test_valid(node_is, visited_is, to_node_i)
+
+        if pos is 0:
+            return len(node_is) is 0
+
+
+if __name__ == "__main__":
+    graph = TalentGraph()
+    node_is = [0, 1, 2, 4]
+    print(graph.test_valid(node_is, []))
             
     
