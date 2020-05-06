@@ -16,6 +16,7 @@ class Node {
         this.id = id;
         this.cons = [];
         this.radius = 10;
+        this.alloc = false;
     }
 
     Load(obj)
@@ -75,6 +76,29 @@ let nodes;
 let mouse_data;
 // </globals>
 
+function calc_dist(obja, objb){
+    let a = obja.x - objb.x;
+    let b = obja.y - objb.y;
+    return Math.sqrt(a**2 + b**2);
+}
+
+let GetClosestNode = () => {
+    let closest = nodes[0];
+    let closest_dist = 9999;
+
+    nodes.forEach(node => {
+        let dist = calc_dist(node, mouse_data);
+        
+        if(dist < closest_dist)
+        {
+            closest_dist = dist;
+            closest = node;
+        }
+    });
+
+    return closest;
+};
+
 let Unpack = () => {
     for(let i = 0; i < talents.length; i++)
     {
@@ -93,6 +117,21 @@ let Render = () => {
     });
 };
 
+let OnClick = () => {
+    let closest = GetClosestNode();
+};
+
+let SetupListeners = () => {
+    canvas.addEventListener("mousemove", (evt) => {
+        mouse_data.x = evt.clientX - bounds.left;
+        mouse_data.y = evt.clientY - bounds.top;
+    }, false);
+
+    canvas.addEventListener("mousedown", function(evt) {
+        OnClick();
+    })
+};
+
 let SetupGlobals = () => {
     nodes = [];
     mouse_data = {x: 0, y: 0};
@@ -106,7 +145,7 @@ let Think = () => {
 let Init = () => {
     SetupGlobals();
 
-    //SetupListeners();
+    SetupListeners();
 
     Unpack();
 
