@@ -6,7 +6,7 @@
         <canvas id="canvas" width="1280" height="720"></canvas>
     </div>
     <div>
-        <button id="submit" onclick="download(JSON.stringify(nodes), 'nodes.json', 'text/plain');">Save JSON</button>
+        <button id="submit" onclick="download(JSON.stringify(nodes, null, 4), 'nodes.json', 'text/plain');">Save JSON</button>
     </div>
     <script src="main.js"></script>
     <script>
