@@ -6,6 +6,9 @@
 # Python compiled bins
 __pycache__
 
+# ignore all backup files
+*.bak
+
 token.txt
 money_log.txt
 wallets.json
