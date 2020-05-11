@@ -21,30 +21,17 @@ async def pswd_command(context):
     args.pop(0)
 
     async def usg():
-        await channel.send('Set a password!\nUsage: .pswd [get|set] PWD\n(Must be in a DM!)')
+        await channel.send('Set a password!\nUsage: .pswd PWD\n(Must be in a DM!)')
 
     if not isinstance(channel, discord.DMChannel):
         await usg()
         return
 
     if len(args):
-        cmd = args.pop(0)
+        pwd = args.pop(0)
         uid = context.message.author.id
-        if cmd == 'get':
-            p = userdb.get_user_value(uid, 'pwd')
-            if p != '':
-                await channel.send('Current password: {}'.format(p))
-            else:
-                await channel.send('No password set!')
-
-        elif cmd == 'set':
-            if not len(args):
-                await usg()
-                return
-            userdb.set_user_value(uid, 'pwd', args.pop(0))
-            await channel.send('Password set!')
-        else:
-            await usg()
+        userdb.set_user_pwd(uid, pwd)
+        await channel.send('Password set!')
     else:
         await usg()
         return
