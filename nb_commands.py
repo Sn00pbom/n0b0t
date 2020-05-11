@@ -14,6 +14,29 @@ async def insufficient_funds(context):
                                        .format(context.message.author.mention))
 
 
+@client.command(name='pswd', pass_context=True)
+async def pswd_command(context):
+    channel = context.message.channel
+    args = context.message.content.split(' ')
+    args.pop(0)
+
+    async def usg():
+        await channel.send('Set a password!\nUsage: .pswd PWD\n(Must be in a DM!)')
+
+    if not isinstance(channel, discord.DMChannel):
+        await usg()
+        return
+
+    if len(args):
+        pwd = args.pop(0)
+        uid = context.message.author.id
+        userdb.set_user_pwd(uid, pwd)
+        await channel.send('Password set!')
+    else:
+        await usg()
+        return
+
+
 @client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
 async def anonymize_command(context):
     ANON_COST = 2

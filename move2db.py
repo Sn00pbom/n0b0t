@@ -30,11 +30,28 @@ def port():
 
     print_all()
 
+def port2():
+    """Move second table to new table with empty hash and salt instead of plaintext pwd"""
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    try:
+        c.execute('CREATE TABLE t (id INT PRIMARY KEY, hash TEXT, salt TEXT, money INT)')
+    except:
+        pass
+    c.execute('SELECT * FROM users')
+    for vals in c.fetchall():
+        c.execute('INSERT INTO t VALUES({},"","",{})'.format(vals[0], vals[2]))
+    c.execute('DROP TABLE users')
+    c.execute('ALTER TABLE t RENAME TO users')
+    c.execute('SELECT * FROM users')
+    print(c.fetchall())
+    conn.commit()
+
 
 def init():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute('CREATE TABLE users (id INT PRIMARY KEY, pwd TEXT, money INT)')
+    c.execute('CREATE TABLE users (id INT PRIMARY KEY, hash TEXT, salt TEXT, money INT)')
     conn.commit()
     conn.close()
 
@@ -46,6 +63,8 @@ if __name__ == "__main__":
             init()
         elif cmd == 'port':
             port()
+        elif cmd == 'port2':
+            port2()
         elif cmd == 'print':
             print_all()
     else:
