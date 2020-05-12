@@ -13,6 +13,13 @@ async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
 
+@client.command(name='dequeue', pass_context=True, aliases=['dq', 'clear'])
+async def dequeue_command(context):
+    COST = CONFIG['cost']['dequeue']
+    async def send_msg():
+        await context.message.channel.send(CONFIG['dequeue-cmd'])
+    await curr_man.do_transaction(context.message.author.id, -COST, send_msg, insufficient_funds),
+
 
 @client.command(name='pswd', pass_context=True)
 async def pswd_command(context):

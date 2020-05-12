@@ -10,6 +10,7 @@
     "role": "pleb",
     "curr-symbol": "₪",
     "curr-name": "Shekel",
+    "dequeue-cmd": ">clear",
     "vote": {
         "anoint": 2,
         "exile": 7,
@@ -22,6 +23,7 @@
         "anonymize": 2,
         "buypin": 10,
         "buypinremoval": 15,
-        "memeviolation": 15
+        "memeviolation": 15,
+        "dequeue": 30
     }
 }
