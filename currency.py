@@ -3,11 +3,10 @@ import random
 import datetime
 
 import util
+from globals import CONFIG
 
 
 class CurrencyManager(object):
-    CURRENCY_SYMBOl = '₪'
-    CH_ID = 699673275986608228
 
     def __init__(self, client, userdb):
         self.client = client
@@ -18,10 +17,12 @@ class CurrencyManager(object):
         return self.userdb.get_user_value(uid, 'money')
 
     async def post_shekel(self):
-        channel = self.client.get_channel(self.CH_ID)
-        quantity = random.randint(5, 10)
+        channel = self.client.get_channel(CONFIG['tree-channel-id'])
+        quantity = random.randint(*CONFIG['tree-drop-value-range'])
         address = util.gen_address()
-        msg_handle = await channel.send('Shekels dropped! {}{} @ {}'.format(self.CURRENCY_SYMBOl, quantity, address))
+        msg_handle = await channel.send('{}s dropped! {}{} @ {}'.format(CONFIG['curr-name'],
+                                                                        CONFIG['curr-symbol'],
+                                                                        quantity, address))
         self.posts[address] = (quantity, msg_handle)
         with open('money_log.txt', 'a') as f:
             f.write('[POST] {} -> {}, {}\n'.format(datetime.datetime.now(), quantity, address))
@@ -76,7 +77,7 @@ class MineTimer(object):
 
     async def _job(self):
         while True:
-            await asyncio.sleep(random.randint(20, 45) * 60)
+            await asyncio.sleep(random.randint(*CONFIG['tree-drop-time-range']) * 60)
             await self._curr_man.post_shekel()
 
     def cancel(self):

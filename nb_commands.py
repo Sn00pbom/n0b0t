@@ -5,13 +5,20 @@ from io import BytesIO
 import discord
 from discord.ext import commands
 
-from globals import client, counsel, curr_man, userdb
+from globals import client, counsel, curr_man, userdb, CONFIG
 from memeviolation import MemeViolation
 
 
 async def insufficient_funds(context):
     await context.message.channel.send("{} is once again asking for your financial support. (insufficient funds)"
                                        .format(context.message.author.mention))
+
+@client.command(name='dequeue', pass_context=True, aliases=['dq', 'clear'])
+async def dequeue_command(context):
+    COST = CONFIG['cost']['dequeue']
+    async def send_msg():
+        await context.message.channel.send(CONFIG['dequeue-cmd'])
+    await curr_man.do_transaction(context.message.author.id, -COST, send_msg, insufficient_funds),
 
 
 @client.command(name='pswd', pass_context=True)
@@ -39,7 +46,7 @@ async def pswd_command(context):
 
 @client.command(name='anonymize', pass_context=True, aliases=['anon', 'mail'])
 async def anonymize_command(context):
-    ANON_COST = 2
+    ANON_COST = CONFIG['cost']['anonymize']
     author = context.author
     args = context.message.content.split(' ')
     try:
@@ -144,7 +151,7 @@ async def spin_command(context):
         if o is 0:
             payfs = 'Better luck next time!'
         else:
-            payfs = '→ Paying {} {}{}'.format(author.mention, curr_man.CURRENCY_SYMBOl, o)
+            payfs = '→ Paying {} {}{}'.format(author.mention, CONFIG['curr-symbol'], o)
 
         frmts += '╔══════════╗\n║ {} ║ {} ║ {}  ║ {}\n╚══════════╝'
 
@@ -174,7 +181,7 @@ async def pay_command(context):
         for _ in range(3): args.pop(0)
         reason_msg = ' for "{}"'.format(' '.join(args)) if len(args) != 0 else '!'
         await context.message.channel.send("{} paid {} {}{}{}".format(
-            author.mention, target_user.mention, curr_man.CURRENCY_SYMBOl, amount, reason_msg))
+            author.mention, target_user.mention, CONFIG['curr-symbol'], amount, reason_msg))
 
     await curr_man.do_transaction(author.id, -amount,
         succ=pay_target,
@@ -188,7 +195,7 @@ async def buypin_command(context):
     if len(args) == 1:
         await context.message.channel.send('Usage: .buypin [MESSAGE]')
         return
-    COST = 10
+    COST = CONFIG['cost']['buypin']
     async def do_pin():
         pin_content = context.message.content[context.message.content.find(' '):len(context.message.content)] + "\n -" + author.mention
         msg = await context.message.channel.send(pin_content)
@@ -212,7 +219,7 @@ async def buypinremoval_command(context):
     except:
         rid = argv[1]
     
-    COST = 15 #arbitrary. i dont know how much this should cost
+    COST = CONFIG['cost']['buypinremoval']
     
     try:
         msg = await context.message.channel.fetch_message(rid)
@@ -260,7 +267,7 @@ async def balance_command(context):
     author = context.message.author
     channel = await author.create_dm()
     quantity = curr_man.get_money(author.id)
-    await channel.send("Your wallet contains: " + curr_man.CURRENCY_SYMBOl + str(quantity))
+    await channel.send("Your wallet contains: " + CONFIG['curr-symbol'] + str(quantity))
     await context.message.delete()
 
 
@@ -300,11 +307,12 @@ async def roll_command(context):
 @client.command(name='anoint',
                 pass_context=True)
 async def anoint_command(context):
+    # NOTE: the bot must have the highest permission or this function will break
     author = context.message.author
     message = context.message.content
     perm = False
     for role in author.roles:
-        if role.name == 'pleb':
+        if role.name == CONFIG['role']:
             perm = True
             pleb_role = role
             break
@@ -446,7 +454,7 @@ Example Usage:
             with BytesIO() as img_bin:
                 img.save(img_bin, 'PNG')
                 img_bin.seek(0)
-                await context.message.channel.send(":rotating_light: MEME VIOLATION :rotating_light:\nIssued to -> {}! penalized {}{}".format(target.mention, curr_man.CURRENCY_SYMBOl, PENALTY),
+                await context.message.channel.send(":rotating_light: MEME VIOLATION :rotating_light:\nIssued to -> {}! penalized {}{}".format(target.mention, CONFIG['curr-symbol'], PENALTY),
                                                     file=discord.File(fp=img_bin, filename='mv.png'))
             await curr_man.do_transaction(target.id, -PENALTY)
 
