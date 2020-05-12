@@ -1,8 +1,12 @@
 {
-    "token": "",
+    ".version": "1.0",
+    "token": "YOUR BOT TOKEN",
+    "chat-channel-id": 1234567890,
     "tree-channel-id": 1234567890,
-    "tree-drop-range": [20, 45],
+    "tree-drop-time-range": [20, 45],
     "role": "pleb",
+    "curr-symbol": "₪",
+    "curr-name": "Shekel",
     "vote": {
         "anoint": 2,
         "exile": 7,
@@ -12,7 +16,7 @@
         "memeviolation": 5
     },
     "cost": {
-        "anonymize": 3,
+        "anonymize": 2,
         "buypin": 10,
         "buypinremoval": 15,
         "memeviolation": 15
