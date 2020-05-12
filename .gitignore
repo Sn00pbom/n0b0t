@@ -6,9 +6,13 @@
 # Python compiled bins
 __pycache__
 
+# Old Files
 token.txt
 money_log.txt
 wallets.json
 secrets.json
+
+# Data and Config Files
 users.db
 users.db-journal
+config.json
