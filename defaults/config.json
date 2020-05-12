@@ -1,5 +1,6 @@
 {
     ".version": "1.0",
+    "prefix": ".",
     "token": "YOUR BOT TOKEN",
     "chat-channel-id": 1234567890,
     "tree-channel-id": 1234567890,
