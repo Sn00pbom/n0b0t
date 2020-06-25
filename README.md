@@ -1,2 +1,2 @@
 # n0b0t
-The official n0b sq0d bot.
+The official n0b sq0d Discord bot.
