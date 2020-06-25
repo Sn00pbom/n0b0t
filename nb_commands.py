@@ -368,7 +368,7 @@ async def delete_command(context):
                 pass_context=True)
 async def mum_command(context):
     response = [
-        " you're mum gey HA",
+        " you're mum ugly HA",
         " Thine mother art a delectable, fine woman and a scholar, good sir."
     ]
     await context.message.channel.send(context.message.author.mention + random.choice(response))
@@ -417,8 +417,8 @@ async def memeviolation_command(context):
         m = """```
 1: Madding Too Fast
 2: Louding Too Fast
-3: Background Shit
-4: Gay Porn Too Gay
+3: Background Stuff
+4: Unfunny
 5: Unironic XD
 6: Rapid Head Expansion
 7: Global Elite Syndrome
